@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora Precio de Equilibrio - Fondo Esperanza</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            color: #173c42;
+            background-color: #f4f9f6;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        header {
+            background-color: #00875a;
+            color: white;
+            text-align: center;
+            padding: 20px 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        header h1 {
+            margin: 0;
+            font-size: 1.6rem;
+            font-weight: bold;
+        }
+        header p {
+            margin: 5px 0 0;
+            font-size: 0.95rem;
+            opacity: 0.9;
+        }
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 0 15px;
+            width: 100%;
+            flex: 1;
+        }
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            border: 1px solid #e1efe8;
+        }
+        .card h2 {
+            margin-top: 0;
+            font-size: 1.2rem;
+            color: #00875a;
+            border-bottom: 2px solid #e1efe8;
+            padding-bottom: 8px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: bold;
+            font-size: 0.95rem;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 1rem;
+        }
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        @media (max-width: 600px) {
+            .grid-2 { grid-template-columns: 1fr; }
+        }
+        .item-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        .item-row input[type="text"] {
+            flex: 2;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+        }
+        .item-row input[type="number"] {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+        }
+        .btn-remove {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 0 12px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .btn-add {
+            background: #e8f5e9;
+            color: #00875a;
+            border: 1px dashed #00875a;
+            width: 100%;
+            padding: 8px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+        .result-box {
+            background-color: #e8f5e9;
+            border-left: 5px solid #00875a;
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 20px;
+        }
+        .result-title {
+            font-size: 0.9rem;
+            color: #555;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .result-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #00875a;
+            margin: 5px 0;
+        }
+        .btn-download {
+            background-color: #00875a;
+            color: white;
+            border: none;
+            width: 100%;
+            padding: 14px;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: background 0.2s;
+        }
+        .btn-download:hover {
+            background-color: #006b47;
+        }
+        footer {
+            text-align: center;
+            padding: 15px;
+            font-size: 0.85rem;
+            color: #666;
+            background: #e9f2ee;
+            margin-top: auto;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Fondo Esperanza</h1>
+        <p>Calculadora de Precio de Equilibrio</p>
+    </header>
+
+    <div class="container">
+        
+        <!-- Paso 1: Producto y Unidades -->
+        <div class="card">
+            <h2>1. Información del Producto o Servicio</h2>
+            <div class="form-group">
+                <label for="producto">Producto o servicio seleccionado:</label>
+                <input type="text" id="producto" placeholder="Ej: Venta de empanadas, Corte de pelo...">
+            </div>
+            <div class="form-group">
+                <label for="unidades">Unidades que deseas vender:</label>
+                <input type="number" id="unidades" min="1" value="1" oninput="calcularTodo()">
+            </div>
+        </div>
+
+        <!-- Paso 2: Costos Fijos y Variables -->
+        <div class="grid-2">
+            <!-- Costos Fijos -->
+            <div class="card">
+                <h2>Costos Fijos</h2>
+                <p style="font-size: 0.8rem; color: #666;">No dependen de la venta (Arriendo, luz, agua, sueldo base...)</p>
+                <div id="contenedor-fijos"></div>
+                <button class="btn-add" onclick="agregarItem('fijos')">+ Agregar Costo Fijo</button>
+                <div style="margin-top: 15px; font-weight: bold; text-align: right;">
+                    Total Fijos: $<span id="total-fijos">0</span>
+                </div>
+            </div>
+
+            <!-- Costos Variables -->
+            <div class="card">
+                <h2>Costos Variables</h2>
+                <p style="font-size: 0.8rem; color: #666;">Directos de la producción (Materia prima, envases...)</p>
+                <div id="contenedor-variables"></div>
+                <button class="btn-add" onclick="agregarItem('variables')">+ Agregar Costo Variable</button>
+                <div style="margin-top: 15px; font-weight: bold; text-align: right;">
+                    Total Variables: $<span id="total-variables">0</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Paso 3: Resultados -->
+        <div class="card">
+            <h2>2. Resultado del Cálculo</h2>
+            
+            <div class="result-box">
+                <div class="result-title">Fórmula aplicada:</div>
+                <div style="font-size: 0.95rem; margin-top: 5px;">
+                    (Costos Fijos + Costos Variables) ÷ Unidades a vender
+                </div>
+                <hr style="border: none; border-top: 1px solid #c8e6c9; margin: 10px 0;">
+                <div class="result-title">Precio de Equilibrio (Precio Costo):</div>
+                <div class="result-value">$<span id="precio-equilibrio">0</span> <span style="font-size: 1rem; font-weight: normal;">por unidad</span></div>
+                <small style="color: #444;">* Este es el valor mínimo para no ganar ni perder dinero.</small>
+            </div>
+
+            <div style="margin-top: 20px;">
+                <button class="btn-download" onclick="descargarExcel()">Descargar mi Planilla en Excel / CSV</button>
+            </div>
+        </div>
+
+    </div>
+
+    <footer>
+        <p>Fondo Esperanza - Módulo 7: Introducción al Negocio</p>
+    </footer>
+
+    <script>
+        window.onload = function() {
+            agregarItem('fijos', 'Arriendo / Gastos comunes', 0);
+            agregarItem('variables', 'Insumos / Materia prima', 0);
+        };
+
+        function agregarItem(tipo, concepto = '', costo = '') {
+            const contenedor = document.getElementById(`contenedor-${tipo}`);
+            const div = document.createElement('div');
+            div.className = 'item-row';
+            div.innerHTML = `
+                <input type="text" placeholder="Ítem" value="${concepto}" class="input-concepto-${tipo}">
+                <input type="number" placeholder="Monto ($)" value="${costo}" class="input-monto-${tipo}" oninput="calcularTodo()">
+                <button class="btn-remove" onclick="eliminarItem(this)">✕</button>
+            `;
+            contenedor.appendChild(div);
+            calcularTodo();
+        }
+
+        function eliminarItem(btn) {
+            btn.parentElement.remove();
+            calcularTodo();
+        }
+
+        function calcularTodo() {
+            let totalFijos = 0;
+            document.querySelectorAll('.input-monto-fijos').forEach(input => {
+                totalFijos += parseFloat(input.value) || 0;
+            });
+            document.getElementById('total-fijos').innerText = Math.round(totalFijos).toLocaleString('es-CL');
+
+            let totalVariables = 0;
+            document.querySelectorAll('.input-monto-variables').forEach(input => {
+                totalVariables += parseFloat(input.value) || 0;
+            });
+            document.getElementById('total-variables').innerText = Math.round(totalVariables).toLocaleString('es-CL');
+
+            const unidades = parseFloat(document.getElementById('unidades').value) || 1;
+            const precioEquilibrio = (totalFijos + totalVariables) / (unidades > 0 ? unidades : 1);
+            document.getElementById('precio-equilibrio').innerText = Math.round(precioEquilibrio).toLocaleString('es-CL');
+        }
+
+        function descargarExcel() {
+            const producto = document.getElementById('producto').value || 'Producto sin nombre';
+            const unidades = document.getElementById('unidades').value || 1;
+            const totalFijos = document.getElementById('total-fijos').innerText;
+            const totalVariables = document.getElementById('total-variables').innerText;
+            const precioEquilibrio = document.getElementById('precio-equilibrio').innerText;
+
+            let csvContent = "\uFEFF"; 
+            csvContent += `FONDO ESPERANZA - PRECIO DE EQUILIBRIO                                  ;\n`;
+            csvContent += `Producto / Servicio:                                                      ;${producto}\n`;
+            csvContent += `Unidades a vender:                                                         ;${unidades}\n\n`;
+
+            csvContent += `--- DETALLE DE COSTOS FIJOS ---                                           ;\n`;
+            csvContent += `Concepto / Ítem                                                           ;Costo ($)\n`;
+            document.querySelectorAll('#contenedor-fijos .item-row').forEach(row => {
+                const concepto = row.querySelector('.input-concepto-fijos').value || 'Sin concepto';
+                const monto = row.querySelector('.input-monto-fijos').value || 0;
+                csvContent += `${concepto.padEnd(70, ' ')};${monto}\n`;
+            });
+            csvContent += `TOTAL COSTOS FIJOS                                                        ;$ ${totalFijos}\n\n`;
+
+            csvContent += `--- DETALLE DE COSTOS VARIABLES ---                                       ;\n`;
+            csvContent += `Concepto / Ítem                                                           ;Costo ($)\n`;
+            document.querySelectorAll('#contenedor-variables .item-row').forEach(row => {
+                const concepto = row.querySelector('.input-concepto-variables').value || 'Sin concepto';
+                const monto = row.querySelector('.input-monto-variables').value || 0;
+                csvContent += `${concepto.padEnd(70, ' ')};${monto}\n`;
+            });
+            csvContent += `TOTAL COSTOS VARIABLES                                                    ;$ ${totalVariables}\n\n`;
+
+            csvContent += `--- RESULTADO FINAL ---                                                    ;\n`;
+            csvContent += `PRECIO DE EQUILIBRIO (POR UNIDAD):                                        ;$ ${precioEquilibrio}\n`;
+
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.setAttribute("href", url);
+            link.setAttribute("download", `Precio_Equilibrio_${producto.replace(/\s+/g, '_')}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    </script>
+</body>
+</html>
